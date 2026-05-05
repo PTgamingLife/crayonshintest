@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蠟筆小新深度心理測驗</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #F5F0E8;
+    --red: #E63946;
+    --blue: #457B9D;
+    --green: #52B788;
+    --dark: #2D2D2D;
+    --brown: #3D2B1F;
+    --yellow: #FFD23F;
+    --pink: #FF6B9D;
+    --border: 3px solid #2D2D2D;
+    --shadow: 4px 4px 0px #2D2D2D;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 手繪風格背景紋理 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 10% 20%, rgba(230,57,70,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 90% 80%, rgba(69,123,157,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(82,183,136,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 手繪裝飾星星 */
+  .deco-star {
+    position: fixed;
+    pointer-events: none;
+    font-size: 20px;
+    opacity: 0.3;
+    animation: floatStar 4s ease-in-out infinite;
+    z-index: 0;
+  }
+  .deco-star:nth-child(1) { top: 8%; left: 5%; animation-delay: 0s; }
+  .deco-star:nth-child(2) { top: 15%; right: 8%; animation-delay: 1s; font-size: 14px; }
+  .deco-star:nth-child(3) { bottom: 20%; left: 3%; animation-delay: 2s; font-size: 16px; }
+  .deco-star:nth-child(4) { bottom: 10%; right: 5%; animation-delay: 0.5s; }
+  .deco-star:nth-child(5) { top: 50%; left: 2%; animation-delay: 1.5s; font-size: 12px; }
+  .deco-star:nth-child(6) { top: 40%; right: 3%; animation-delay: 3s; font-size: 18px; }
+
+  @keyframes floatStar {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(15deg); }
+  }
+
+  .app-container {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: 20px 16px;
+  }
+
+  /* ===== 頁面卡片 ===== */
+  .page {
+    display: none;
+    width: 100%;
+    animation: pageIn 0.4s ease;
+  }
+  .page.active { display: flex; flex-direction: column; align-items: center; }
+
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ===== 封面頁 ===== */
+  .cover-card {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 24px;
+    box-shadow: 8px 8px 0px var(--dark);
+    padding: 24px 20px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, var(--red) 0px, var(--red) 20px, var(--yellow) 20px, var(--yellow) 40px, var(--blue) 40px, var(--blue) 60px, var(--green) 60px, var(--green) 80px);
+  }
+
+  .cover-img-wrap {
+    width: 100%;
+    max-height: 260px;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 3px solid var(--dark);
+    margin: 16px 0 20px;
+    background: #eef6ff;
+  }
+
+  .cover-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cover-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--dark);
+    line-height: 1.4;
+    margin-bottom: 6px;
+    text-shadow: 2px 2px 0px rgba(230,57,70,0.15);
+  }
+
+  .cover-title span {
+    color: var(--red);
+  }
+
+  .cover-sub {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  /* 手繪風按鈕 */
+  .btn-main {
+    background: var(--red);
+    color: white;
+    font-size: 18px;
+    font-weight: 900;
+    font-family: 'Noto Sans TC', sans-serif;
+    border: 3px solid var(--dark);
+    border-radius: 50px;
+    padding: 14px 48px;
+    cursor: pointer;
+    box-shadow: 5px 5px 0px var(--dark);
+    transition: all 0.15s;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-main::before {
+    content: '★';
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    opacity: 0.8;
+  }
+
+  .btn-main:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0px var(--dark);
+  }
+
+  .btn-main:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0px var(--dark);
+  }
+
+  /* ===== 問題頁 ===== */
+  .question-card {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 24px;
+    box-shadow: 8px 8px 0px var(--dark);
+    padding: 24px 20px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--red) 0px, var(--red) 15px, var(--yellow) 15px, var(--yellow) 30px, var(--blue) 30px, var(--blue) 45px, var(--green) 45px, var(--green) 60px);
+  }
+
+  /* 進度條 */
+  .progress-wrap {
+    margin: 12px 0 20px;
+    width: 100%;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .progress-bar-bg {
+    width: 100%;
+    height: 14px;
+    background: #F5F0E8;
+    border: 2px solid var(--dark);
+    border-radius: 50px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--red), var(--yellow));
+    border-radius: 50px;
+    transition: width 0.4s ease;
+  }
+
+  /* 問題標題 */
+  .q-number {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 4px 12px;
+    border: 2px solid var(--dark);
+    border-radius: 50px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  .q-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    padding: 14px;
+    background: #FFF8E7;
+    border: 2px solid var(--dark);
+    border-radius: 12px;
+    position: relative;
+  }
+
+  .q-text::before {
+    content: '✏️';
+    margin-right: 6px;
+  }
+
+  /* 選項 */
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: white;
+    border: 2px solid var(--dark);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dark);
+    text-align: left;
+    transition: all 0.15s;
+    box-shadow: 3px 3px 0px rgba(45,45,45,0.15);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+
+  .option-letter {
+    min-width: 26px;
+    height: 26px;
+    background: #F5F0E8;
+    border: 2px solid var(--dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .option-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px rgba(45,45,45,0.2);
+    background: #FFF8E7;
+  }
+
+  .option-btn:hover .option-letter {
+    background: var(--yellow);
+  }
+
+  .option-btn.selected {
+    background: var(--red);
+    color: white;
+    border-color: var(--dark);
+    box-shadow: 4px 4px 0px var(--dark);
+    transform: translate(-1px, -1px);
+  }
+
+  .option-btn.selected .option-letter {
+    background: rgba(255,255,255,0.3);
+    color: white;
+  }
+
+  /* ===== 計算頁 ===== */
+  .loading-card {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 24px;
+    box-shadow: 8px 8px 0px var(--dark);
+    padding: 48px 32px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .loading-img {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    margin: 0 auto 20px;
+    animation: bounce 0.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0) rotate(-5deg); }
+    to { transform: translateY(-15px) rotate(5deg); }
+  }
+
+  .loading-text {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 8px;
+  }
+
+  .loading-sub {
+    font-size: 13px;
+    color: #888;
+  }
+
+  .dot-anim {
+    display: inline-block;
+  }
+
+  /* ===== 結果頁 ===== */
+  .result-card {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 24px;
+    box-shadow: 8px 8px 0px var(--dark);
+    padding: 24px 20px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, var(--red) 0px, var(--red) 20px, var(--yellow) 20px, var(--yellow) 40px, var(--blue) 40px, var(--blue) 60px, var(--green) 60px, var(--green) 80px);
+  }
+
+  .result-badge {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--dark);
+    font-size: 12px;
+    font-weight: 900;
+    padding: 5px 16px;
+    border: 2px solid var(--dark);
+    border-radius: 50px;
+    margin-bottom: 12px;
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  .result-char-img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    border: 4px solid var(--dark);
+    background: #FFF8E7;
+    box-shadow: 5px 5px 0px var(--dark);
+    padding: 8px;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+    to { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .result-char-name {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--red);
+    margin-bottom: 4px;
+    text-shadow: 2px 2px 0px rgba(230,57,70,0.15);
+  }
+
+  .result-char-tag {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 16px;
+  }
+
+  .result-divider {
+    width: 60px;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--red) 0px, var(--red) 10px, var(--yellow) 10px, var(--yellow) 20px);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .result-desc {
+    font-size: 14px;
+    color: #444;
+    line-height: 1.8;
+    padding: 16px;
+    background: #FFF8E7;
+    border: 2px solid var(--dark);
+    border-radius: 12px;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+
+  .btn-retry {
+    background: var(--blue);
+    color: white;
+    font-size: 16px;
+    font-weight: 900;
+    font-family: 'Noto Sans TC', sans-serif;
+    border: 3px solid var(--dark);
+    border-radius: 50px;
+    padding: 12px 36px;
+    cursor: pointer;
+    box-shadow: 5px 5px 0px var(--dark);
+    transition: all 0.15s;
+    letter-spacing: 1px;
+  }
+
+  .btn-retry:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0px var(--dark);
+  }
+
+  .btn-retry:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0px var(--dark);
+  }
+
+  /* 分享按鈕 */
+  .share-section {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    z-index: 100;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    from { transform: translateY(0) rotate(0deg); opacity: 1; }
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 裝飾 -->
+<div class="deco-star">✦</div>
+<div class="deco-star">✧</div>
+<div class="deco-star">★</div>
+<div class="deco-star">✦</div>
+<div class="deco-star">✶</div>
+<div class="deco-star">✧</div>
+
+<div class="app-container">
+
+  <!-- 封面頁 -->
+  <div class="page active" id="sc-page-cover">
+    <div class="cover-card">
+      <div class="cover-img-wrap">
+        <img src="IMG_3833.png" alt="蠟筆小新封面" onerror="this.style.display='none';this.parentElement.style.background='#eef6ff';this.parentElement.style.minHeight='180px'">
+      </div>
+      <div class="cover-title">蠟筆小新<span>深度</span>心理測驗</div>
+      <div class="cover-sub">你是春日部哪位居民？<br>8個問題，揭開你的真實個性！</div>
+      <button class="btn-main" onclick="sc_startQuiz()">開始測驗 ！</button>
+    </div>
+  </div>
+
+  <!-- 問題頁 -->
+  <div class="page" id="sc-page-question">
+    <div class="question-card">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span id="sc-q-label">第 1 題</span>
+          <span id="sc-q-total">共 8 題</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="sc-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="q-number" id="sc-q-num">Q1</div>
+      <div class="q-text" id="sc-q-text"></div>
+      <div class="options-list" id="sc-options-list"></div>
+    </div>
+  </div>
+
+  <!-- 計算頁 -->
+  <div class="page" id="sc-page-loading">
+    <div class="loading-card">
+      <img src="IMG_3832.png" class="loading-img" alt="小新"
+        onerror="this.src='';this.style.fontSize='80px';this.outerHTML='<div style=\'font-size:80px;margin-bottom:20px\'>🖍️</div>'">
+      <div class="loading-text">分析你的個性中<span class="dot-anim" id="sc-dots"></span></div>
+      <div class="loading-sub">春日部居民正在討論你是哪一位⋯</div>
+    </div>
+  </div>
+
+  <!-- 結果頁 -->
+  <div class="page" id="sc-page-result">
+    <div class="result-card">
+      <div class="result-badge">🌈 測驗結果</div>
+      <img src="" alt="角色圖" class="result-char-img" id="sc-result-img">
+      <div class="result-char-name" id="sc-result-name"></div>
+      <div class="result-char-tag" id="sc-result-tag"></div>
+      <div class="result-divider"></div>
+      <div class="result-desc" id="sc-result-desc"></div>
+      <button class="btn-retry" onclick="sc_resetQuiz()">🔄 再測一次</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const sc_questions = [
+  {
+    text: "走在路上突然看到一疊錢，你的第一個反應是？",
+    options: [
+      { letter: "A", text: "拿去買想吃很久的高級餅乾或巧克力。" },
+      { letter: "B", text: "左右張望，心跳加速，擔心是整人節目或警察在看。" },
+      { letter: "C", text: "幻想這筆錢能讓我過上名流生活。" },
+      { letter: "D", text: "冷靜地觀察四周，分析這疊錢出現的邏輯。" },
+      { letter: "E", text: "直接交給警察局，這是身為公民的責任。" },
+      { letter: "F", text: "拿去付下個月的房貸、車貸或生活費。" },
+      { letter: "G", text: "默默把它撿起來，觀察上面有沒有特殊的紋路。" },
+    ]
+  },
+  {
+    text: "週末早晨，家裡發生了大混亂（漏水、東西壞了），你會？",
+    options: [
+      { letter: "A", text: "繼續睡覺，或是拿壞掉的東西玩遊戲。" },
+      { letter: "B", text: "嚇到不知所措，開始往壞處想。" },
+      { letter: "C", text: "嫌棄這太狼狽了，打電話叫人來修，順便抱怨。" },
+      { letter: "D", text: "翻閱說明書或上網查解決方案。" },
+      { letter: "E", text: "穿上圍裙，雖然一邊碎碎念但還是動手處理。" },
+      { letter: "F", text: "捲起袖子嘗試修理，雖然可能會弄得更糟，但很有熱情。" },
+      { letter: "G", text: "靜靜地看著水流的方向，覺得有種神祕的美感。" },
+    ]
+  },
+  {
+    text: "關於「夢想」，你目前的態度是？",
+    options: [
+      { letter: "A", text: "夢想是什麼？能吃嗎？現在開心最重要。" },
+      { letter: "B", text: "只要能安穩、不被欺負地度過每一天就好。" },
+      { letter: "C", text: "成為萬眾矚目的焦點，過著被羨慕的生活。" },
+      { letter: "D", text: "進入頂尖學府或公司，實現社會階級的提升。" },
+      { letter: "E", text: "把家裡打理好，看著愛的人平安成長。" },
+      { letter: "F", text: "雖然有壓力，但為了家庭在職場努力升遷。" },
+      { letter: "G", text: "持續探索這個世界未知的奧秘。" },
+    ]
+  },
+  {
+    text: "參加派對時，你最受不了哪種人？",
+    options: [
+      { letter: "A", text: "愛說教、太嚴肅的人。" },
+      { letter: "B", text: "咄咄逼人、聲音很大的人。" },
+      { letter: "C", text: "比我還要愛出風頭、搶走焦點的人。" },
+      { letter: "D", text: "沒常識、不講道理的人。" },
+      { letter: "E", text: "生活習慣差、不懂節約的人。" },
+      { letter: "F", text: "沒熱情、遇到困難就退縮的人。" },
+      { letter: "G", text: "話太多、打破安靜氣氛的人。" },
+    ]
+  },
+  {
+    text: "如果你可以擁有一種超能力，你會選？",
+    options: [
+      { letter: "A", text: "隨時隨地能變出最愛的零食。" },
+      { letter: "B", text: "隱身術，這樣就沒人會注意到我或找我麻煩。" },
+      { letter: "C", text: "讓所有人都聽命於我的女王/國王能力。" },
+      { letter: "D", text: "瞬間移動，節省補習與通勤的時間。" },
+      { letter: "E", text: "只要一吼，家裡立刻變乾淨的清掃力。" },
+      { letter: "F", text: "永遠用不完的體力，應付高壓工作。" },
+      { letter: "G", text: "跟石頭或植物溝通的能力。" },
+    ]
+  },
+  {
+    text: "當朋友難過時，你會怎麼安慰他？",
+    options: [
+      { letter: "A", text: "講一個冷笑話，或是邀請他一起胡搞瞎搞。" },
+      { letter: "B", text: "陪他一起哭，甚至哭得比他還慘。" },
+      { letter: "C", text: "跟他說：「這沒什麼，看我過得更有自信一點！」" },
+      { letter: "D", text: "給予條理清晰的分析與具體建議。" },
+      { letter: "E", text: "煮一頓豐盛的餐點給他吃，讓他感受溫暖。" },
+      { letter: "F", text: "帶他去喝一杯，拍拍他的肩膀說：「兄弟我懂。」" },
+      { letter: "G", text: "默默地坐在他旁邊，遞給他一顆特別的石頭。" },
+    ]
+  },
+  {
+    text: "你的購物習慣通常是？",
+    options: [
+      { letter: "A", text: "看到喜歡的就吵著要買，完全不看預算。" },
+      { letter: "B", text: "猶豫不決，最後可能什麼都沒買就回家了。" },
+      { letter: "C", text: "只買名牌或是能提升質感（面子）的東西。" },
+      { letter: "D", text: "貨比三家，購買對未來發展有益的產品。" },
+      { letter: "E", text: "瘋狂對比折扣券，哪裡便宜去哪裡。" },
+      { letter: "F", text: "平時很節省，但遇到大件家電或愛好會忍痛刷卡。" },
+      { letter: "G", text: "買一些別人看不懂、但自己覺得很有趣的收藏品。" },
+    ]
+  },
+  {
+    text: "你最希望給人留下的印象是？",
+    options: [
+      { letter: "A", text: "自由自在、不受拘束的人。" },
+      { letter: "B", text: "善良、低調的人。" },
+      { letter: "C", text: "有領導力、非常有格調的人。" },
+      { letter: "D", text: "聰明、有前途的菁英。" },
+      { letter: "E", text: "效率極高、家務萬能的強人。" },
+      { letter: "F", text: "誠實、可靠且熱愛生活的家柱。" },
+      { letter: "G", text: "深不可測、充滿智慧的奇才。" },
+    ]
+  }
+];
+
+const sc_results = {
+  A: {
+    name: "野原新之助（小新）",
+    tag: "靈魂自由的冒險家",
+    img: "IMG_3822.png",
+    desc: "你不受社會規則束縛，總能從平凡中找到樂趣。雖然偶爾被說「厚臉皮」，但你的樂觀是大家在壓力下的救贖。你的天真與活力，讓身邊的人忍不住跟著歡笑！"
+  },
+  B: {
+    name: "佐藤正男",
+    tag: "細膩溫柔的守護者",
+    img: "IMG_3831.png",
+    desc: "你雖然膽小、容易受驚，但非常善良，是團體裡的潤滑劑。你渴望安全感，在舒適圈裡最能發揮才華。你的溫柔與體貼，是身邊人最珍貴的依靠。"
+  },
+  C: {
+    name: "櫻田妮妮",
+    tag: "天生的劇作家",
+    img: "IMG_3834.png",
+    desc: "內心充滿強大的表現慾與控制欲，不甘於平凡。雖然有時會強勢地拉著別人配合你（超現實過家家），但這也代表你很有主見！你的個性魅力讓人印象深刻。"
+  },
+  D: {
+    name: "風間徹",
+    tag: "追求完美的菁英",
+    img: "IMG_3826.png",
+    desc: "自尊心極強，對知識有渴望。雖然有時會因為「愛面子」而顯得傲嬌，但你的努力與自律是大家公認的。你是那種天生就有領袖氣質的人！"
+  },
+  E: {
+    name: "野原美冴",
+    tag: "效率至上的掌權者",
+    img: "IMG_3824.png",
+    desc: "外表可能愛碎碎念、愛搶便宜，但內心極其堅韌。你是解決問題的高手，雖然生活忙碌，卻能把混亂理出頭緒。家裡有你，才是真正的安心！"
+  },
+  F: {
+    name: "野原廣志",
+    tag: "腳踏實地的英雄",
+    img: "IMG_3824.png",
+    desc: "雖然有時會感到生活壓力大、想逃避，但關鍵時刻你絕對會為了守護珍貴的人而戰。你懂得在現實與理想間取得平衡，是真正可靠的大人！"
+  },
+  G: {
+    name: "阿呆",
+    tag: "大智若愚的觀察家",
+    img: "IMG_3829.png",
+    desc: "你的內心世界極其豐富且自成一格。你不必多說話，就能洞察世事的本質，是那種低調卻擁有驚人實力的奇才。與你相處，總有意想不到的驚喜！"
+  }
+};
+
+let sc_currentQ = 0;
+let sc_answers = [];
+let sc_dotsInterval = null;
+
+function sc_showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function sc_startQuiz() {
+  sc_currentQ = 0;
+  sc_answers = [];
+  sc_renderQuestion();
+  sc_showPage('sc-page-question');
+}
+
+function sc_renderQuestion() {
+  const q = sc_questions[sc_currentQ];
+  const pct = (sc_currentQ / sc_questions.length) * 100;
+
+  document.getElementById('sc-q-label').textContent = `第 ${sc_currentQ + 1} 題`;
+  document.getElementById('sc-q-num').textContent = `Q${sc_currentQ + 1}`;
+  document.getElementById('sc-q-text').innerHTML = q.text;
+  document.getElementById('sc-progress-fill').style.width = pct + '%';
+
+  const list = document.getElementById('sc-options-list');
+  list.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${opt.letter}</span><span>${opt.text}</span>`;
+    btn.onclick = () => sc_selectOption(opt.letter, btn);
+    list.appendChild(btn);
+  });
+}
+
+function sc_selectOption(letter, btn) {
+  // 視覺選中
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  setTimeout(() => {
+    sc_answers.push(letter);
+    sc_currentQ++;
+    if (sc_currentQ < sc_questions.length) {
+      sc_renderQuestion();
+    } else {
+      sc_showLoading();
+    }
+  }, 350);
+}
+
+function sc_showLoading() {
+  sc_showPage('sc-page-loading');
+  let dots = 0;
+  const el = document.getElementById('sc-dots');
+  sc_dotsInterval = setInterval(() => {
+    dots = (dots + 1) % 4;
+    el.textContent = '.'.repeat(dots);
+  }, 400);
+
+  setTimeout(() => {
+    clearInterval(sc_dotsInterval);
+    sc_showResult();
+  }, 2200);
+}
+
+function sc_showResult() {
+  // 統計最多字母
+  const count = {};
+  sc_answers.forEach(a => count[a] = (count[a] || 0) + 1);
+  let max = 0, winner = sc_answers[sc_answers.length - 1];
+  for (const [k, v] of Object.entries(count)) {
+    if (v > max) { max = v; winner = k; }
+  }
+
+  const r = sc_results[winner];
+  document.getElementById('sc-result-img').src = r.img;
+  document.getElementById('sc-result-img').onerror = function() {
+    this.style.display = 'none';
+  };
+  document.getElementById('sc-result-name').textContent = r.name;
+  document.getElementById('sc-result-tag').textContent = '「' + r.tag + '」';
+  document.getElementById('sc-result-desc').textContent = r.desc;
+
+  sc_showPage('sc-page-result');
+  sc_launchConfetti();
+}
+
+function sc_launchConfetti() {
+  const colors = ['#E63946','#FFD23F','#457B9D','#52B788','#FF6B9D','#2D2D2D'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.width = (Math.random() * 10 + 6) + 'px';
+      el.style.height = (Math.random() * 10 + 6) + 'px';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      el.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 60);
+  }
+}
+
+function sc_resetQuiz() {
+  sc_showPage('sc-page-cover');
+}
+</script>
+</body>
+</html>
